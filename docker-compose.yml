@@ -1,0 +1,10 @@
+services:
+  sqlserver:
+    build: .
+    container_name: bokhandel-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "BokH4ndel!2024"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"

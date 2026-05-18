@@ -41,11 +41,7 @@ env/
 .DS_Store
 Thumbs.db
 
-# Docker (not part of assignment submission)
-Dockerfile
-docker-compose.yml
-docker-entrypoint.sh
-.dockerignore
+# Docker (for development, now included)
 
 # SQL Server data files
 *.mdf
