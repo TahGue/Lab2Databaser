@@ -265,7 +265,9 @@ go
 
 -- -------------------------------------------------------
 -- Ge Python-appens läsanvändare rätt att köra SP:na.
--- (Inga andra rättigheter än SELECT på vyer/tabeller.)
-grant execute on SökBok    to bokhandel_lasare;
-grant execute on HämtaLager to bokhandel_lasare;
+-- Mönster från lärarens UserDemo.sql: db_datareader + EXECUTE på SP
+-- ger kontrollerad åtkomst – även skrivningar via validerade SP:er.
+grant execute on SökBok      to bokhandel_lasare;
+grant execute on HämtaLager  to bokhandel_lasare;
+grant execute on FlyttaBok   to bokhandel_lasare;
 go

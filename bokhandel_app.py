@@ -14,29 +14,35 @@ SÄKERHET – SQL-injection skydd på databasnivå:
 """
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import URL
 from sqlalchemy.exc import SQLAlchemyError
+from getpass import getpass
 
-# Byt anslutningssträng efter behov.
-#
-# 1. Docker SQL Server (default om du kör med docker-compose):
-ENGINE = create_engine(
-    "mssql+pyodbc://bokhandel_lasare:BokH4ndel!Las4re@localhost,1433/Bokhandel"
-    "?driver=ODBC+Driver+18+for+SQL+Server"
-    "&TrustServerCertificate=yes"
+# Anslutningskonfiguration – följer lärarens SQLAlchemyDemo-mönster
+# med URL.create() för säker hantering av specialtecken i lösenord.
+server_name   = "localhost,1433"
+database_name = "Bokhandel"
+
+# 1. Docker SQL Server (default) – lösenord via getpass eller miljövariabel:
+user_name = "bokhandel_lasare"
+pwd = getpass("Lösenord (Enter för default): ") or "BokH4ndel!Las4re"
+
+connection_string = (
+    f"DRIVER=ODBC Driver 18 for SQL Server;"
+    f"SERVER={server_name};UID={user_name};PWD={pwd};"
+    f"DATABASE={database_name};TrustServerCertificate=yes"
 )
+url_string = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
+ENGINE = create_engine(url_string)
 
 # 2. Windows Authentication (lokal SQL Server):
-# ENGINE = create_engine(
-#     "mssql+pyodbc://@localhost/Bokhandel"
-#     "?driver=ODBC+Driver+18+for+SQL+Server"
-#     "&trusted_connection=yes"
+# connection_string = (
+#     f"DRIVER=ODBC Driver 18 for SQL Server;"
+#     f"SERVER=localhost;DATABASE={database_name};"
+#     f"Trusted_Connection=yes;TrustServerCertificate=yes"
 # )
-
-# 3. SQL Server Authentication (lokal instans):
-# ENGINE = create_engine(
-#     "mssql+pyodbc://bokhandel_lasare:BokH4ndel!Las4re@localhost/Bokhandel"
-#     "?driver=ODBC+Driver+18+for+SQL+Server"
-# )
+# url_string = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
+# ENGINE = create_engine(url_string)
 
 
 def get_engine():
@@ -56,8 +62,10 @@ def sok_bocker(sokterm):
     resultat = []
     with get_engine().connect() as conn:
         bocker = conn.execute(sp_sok, {"term": sokterm}).fetchall()
+        conn.commit()
         for rad in bocker:
             lager = conn.execute(sp_lager, {"isbn": rad.ISBN13}).fetchall()
+            conn.commit()
             resultat.append({
                 "isbn":       rad.ISBN13,
                 "titel":      rad.Titel,
