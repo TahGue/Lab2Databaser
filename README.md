@@ -59,9 +59,30 @@ Appen demonstrerar DB-nivå SQL-injection skydd vid uppstart.
 ```
 sqlalchemy>=2.0.0
 pyodbc>=4.0.0
+python-dotenv>=1.0
 ```
 
 Installera med: `pip install -r requirements.txt`
+
+### Konfiguration (.env)
+
+Lösenord och anslutningsinställningar läses från miljövariabler eller en `.env`-fil (som ignoreras av git):
+
+```bash
+# Kopiera mallen och fyll i dina värden
+cp .env.example .env
+```
+
+**`.env`-fil exempel:**
+```bash
+DB_SERVER=localhost,1433
+DB_NAME=Bokhandel
+DB_USER=bokhandel_lasare
+DB_PASSWORD=BokH4ndel!Las4re
+```
+
+- Om `.env` saknas → appen frågar efter lösenord via `getpass()` (lärarens mönster)
+- `.env` ingår **aldrig** i git – se `.gitignore`
 
 ## ER-diagram
 

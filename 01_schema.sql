@@ -1,7 +1,3 @@
--- Bokhandel Databas – Schema
--- Kör detta skript i SQL Server Management Studio (SSMS)
--- Ordning: schema → demodata (02) → vyer/SP (03)
-
 create database Bokhandel
     collate SQL_Latin1_General_CP1_CI_AS;
 go
@@ -9,8 +5,6 @@ go
 use Bokhandel;
 go
 
--- -------------------------------------------------------
--- Förlag som ger ut böcker
 create table Förlag (
     FörlagID    int             identity(1,1) primary key,
     Namn        nvarchar(150)   not null,
@@ -19,7 +13,6 @@ create table Förlag (
 );
 go
 
--- Kategorier / genrer
 create table Kategorier (
     KategoriID  int             identity(1,1) primary key,
     Namn        nvarchar(100)   not null unique,
@@ -27,7 +20,6 @@ create table Kategorier (
 );
 go
 
--- Författare
 create table Författare (
     ID              int             identity(1,1) primary key,
     Förnamn         nvarchar(100)   not null,
@@ -37,7 +29,6 @@ create table Författare (
 );
 go
 
--- Böcker – ISBN13 som PK (13 siffror, valideras med check)
 create table Böcker (
     ISBN13          char(13)        not null primary key
         check (ISBN13 not like '%[^0-9]%' and len(ISBN13) = 13),
@@ -55,7 +46,6 @@ create table Böcker (
 );
 go
 
--- BokFörfattare – junction-tabell för many-many relation (VG)
 create table BokFörfattare (
     ISBN13          char(13)    not null references Böcker(ISBN13)
         on update cascade on delete cascade,
@@ -65,7 +55,6 @@ create table BokFörfattare (
 );
 go
 
--- Butiker
 create table Butiker (
     ButikID     int             identity(1,1) primary key,
     Butiksnamn  nvarchar(150)   not null,
@@ -76,7 +65,6 @@ create table Butiker (
 );
 go
 
--- LagerSaldo – kompositnyckel på ButikID + ISBN
 create table LagerSaldo (
     ButikID     int         not null references Butiker(ButikID)
         on update cascade on delete cascade,
@@ -87,7 +75,6 @@ create table LagerSaldo (
 );
 go
 
--- Kunder
 create table Kunder (
     KundID      int             identity(1,1) primary key,
     Förnamn     nvarchar(100)   not null,
@@ -101,7 +88,6 @@ create table Kunder (
 );
 go
 
--- Ordrar
 create table Ordrar (
     OrderID     int             identity(1,1) primary key,
     KundID      int             not null references Kunder(KundID)
@@ -116,7 +102,6 @@ create table Ordrar (
 );
 go
 
--- OrderRader – en rad per bokrad i ordern
 create table OrderRader (
     OrderRadID  int             identity(1,1) primary key,
     OrderID     int             not null references Ordrar(OrderID)
@@ -127,7 +112,6 @@ create table OrderRader (
 );
 go
 
--- Anställda – personal i varje butik
 create table Anställda (
     AnställdID  int             identity(1,1) primary key,
     ButikID     int             not null references Butiker(ButikID)
@@ -142,7 +126,6 @@ create table Anställda (
 );
 go
 
--- Recensioner – kundrecensioner av böcker
 create table Recensioner (
     RecensionsID    int             identity(1,1) primary key,
     ISBN13          char(13)        not null references Böcker(ISBN13)
@@ -155,16 +138,12 @@ create table Recensioner (
 );
 go
 
--- Index för vanliga sökningar
 create index IX_Böcker_Titel       on Böcker(Titel);
 create index IX_Kunder_Epost      on Kunder(Epost);
 create index IX_Ordrar_KundID     on Ordrar(KundID);
 create index IX_Recensioner_ISBN  on Recensioner(ISBN13);
 go
 
--- -------------------------------------------------------
--- Säkerhet – login med enbart läsrättigheter för Python-appen
--- (Byt lösenord i produktion)
 create login bokhandel_lasare with password = 'BokH4ndel!Las4re';
 go
 

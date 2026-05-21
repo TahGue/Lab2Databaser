@@ -17,16 +17,26 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 from sqlalchemy.exc import SQLAlchemyError
 from getpass import getpass
+from dotenv import load_dotenv
+import os
+
+# Ladda miljövariabler från .env-fil (om den finns)
+# .env ignoreras av git – ladda aldrig upp riktiga lösenord!
+load_dotenv()
 
 # Anslutningskonfiguration – följer lärarens SQLAlchemyDemo-mönster
 # med URL.create() för säker hantering av specialtecken i lösenord.
-server_name   = "localhost,1433"
-database_name = "Bokhandel"
+# Värden kan sättas via .env-fil eller miljövariabler.
+server_name   = os.getenv("DB_SERVER", "localhost,1433")
+database_name = os.getenv("DB_NAME", "Bokhandel")
+user_name     = os.getenv("DB_USER", "bokhandel_lasare")
 
-# 1. Docker SQL Server (default) – lösenord via getpass eller miljövariabel:
-user_name = "bokhandel_lasare"
-pwd = getpass("Lösenord (Enter för default): ") or "BokH4ndel!Las4re"
+# Lösenord: prioritera .env, fallback till getprompt (lärarens mönster)
+pwd = os.getenv("DB_PASSWORD")
+if not pwd:
+    pwd = getpass(f"Lösenord för {user_name} (Enter för default): ") or "BokH4ndel!Las4re"
 
+# Bygg ODBC-anslutningssträng
 connection_string = (
     f"DRIVER=ODBC Driver 18 for SQL Server;"
     f"SERVER={server_name};UID={user_name};PWD={pwd};"
@@ -34,15 +44,6 @@ connection_string = (
 )
 url_string = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
 ENGINE = create_engine(url_string)
-
-# 2. Windows Authentication (lokal SQL Server):
-# connection_string = (
-#     f"DRIVER=ODBC Driver 18 for SQL Server;"
-#     f"SERVER=localhost;DATABASE={database_name};"
-#     f"Trusted_Connection=yes;TrustServerCertificate=yes"
-# )
-# url_string = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
-# ENGINE = create_engine(url_string)
 
 
 def get_engine():

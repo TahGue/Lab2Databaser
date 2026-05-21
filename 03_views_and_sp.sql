@@ -1,19 +1,12 @@
--- Bokhandel Databas – Vyer och Stored Procedures
-
 use Bokhandel;
 go
 
--- vy: TitlarPerFörfattare
--- Visar namn, ålder, antal titlar och totalt lagervärde per författare.
--- OBS: lagervärde beräknas per bok först (CTE) för att undvika
--- dubbelräkning av böcker med flera författare.
 if object_id('TitlarPerFörfattare', 'V') is not null
     drop view TitlarPerFörfattare;
 go
 
 create view TitlarPerFörfattare as
 with BokVärde as (
-    -- Totalt lagervärde per bok, summerat över alla butiker
     select
         b.ISBN13,
         b.Pris * isnull(sum(ls.Antal), 0)   as Lagervärde
@@ -45,19 +38,6 @@ group by
     f.Födelsedatum;
 go
 
-/*
-    Kontrollkörning:
-    select top 1 * from TitlarPerFörfattare order by Lagervärde desc;
-*/
-
-
--- vy: KundOrderÖversikt  (extra VG-vy)
--- Sammanställer köphistorik per kund från tabellerna Kunder, Ordrar och OrderRader.
---
--- Motivering: Bokhandeln kan använda vyn för att snabbt identifiera sina mest
--- köpstarka kunder, följa upp pågående ordrar och rikta erbjudanden. Den
--- aggregerar totalt spenderat belopp, antal ordrar och datum för senaste köp –
--- information som annars kräver flera JOIN-frågor varje gång.
 if object_id('KundOrderÖversikt', 'V') is not null
     drop view KundOrderÖversikt;
 go
@@ -85,17 +65,6 @@ group by
     k.Epost;
 go
 
-
--- stored procedure: FlyttaBok  (VG)
--- Flyttar @Antal exemplar av @ISBN från @FrånButikID till @TillButikID.
---
--- Dataintegritet:
---   1. Validerar att antal > 0 och att källa ≠ mål.
---   2. Kontrollerar att båda butiker och boken existerar.
---   3. Låser källraden med UPDLOCK + ROWLOCK innan kontroll av saldo
---      för att förhindra race conditions.
---   4. Hela flytten körs i en transaktion – fel triggar rollback via XACT_ABORT.
---   5. Upsert i målbutiken: uppdaterar befintlig rad eller skapar ny.
 if object_id('FlyttaBok', 'P') is not null
     drop procedure FlyttaBok;
 go
@@ -188,17 +157,6 @@ begin
 end;
 go
 
-/*
-    Exempelkörning:
-    exec FlyttaBok @FrånButikID = 1, @TillButikID = 2,
-                   @ISBN = '9789113027494', @Antal = 3;
-*/
-
-
--- stored procedure: SökBok
--- Kapslar in all SELECT-logik för boksökning. Python-appen anropar enbart
--- exec SökBok @Sökterm = '...' och skickar aldrig egen SQL.
--- Parametern @Sökterm är nvarchar(255) — typad och säker.
 if object_id('SökBok', 'P') is not null
     drop procedure SökBok;
 go
@@ -235,9 +193,6 @@ begin
 end;
 go
 
-
--- stored procedure: HämtaLager
--- Returnerar lagersaldo per butik för ett givet ISBN.
 if object_id('HämtaLager', 'P') is not null
     drop procedure HämtaLager;
 go
@@ -262,11 +217,6 @@ begin
 end;
 go
 
-
--- -------------------------------------------------------
--- Ge Python-appens läsanvändare rätt att köra SP:na.
--- Mönster från lärarens UserDemo.sql: db_datareader + EXECUTE på SP
--- ger kontrollerad åtkomst – även skrivningar via validerade SP:er.
 grant execute on SökBok      to bokhandel_lasare;
 grant execute on HämtaLager  to bokhandel_lasare;
 grant execute on FlyttaBok   to bokhandel_lasare;

@@ -1,9 +1,6 @@
--- Bokhandel Databas – Demodata
-
 use Bokhandel;
 go
 
--- Förlag
 insert into Förlag (Namn, Land, Webbplats) values
     ('Norstedts',       'Sverige', 'https://www.norstedts.se'),
     ('Albert Bonniers', 'Sverige', 'https://www.albertbonniers.se'),
@@ -11,7 +8,6 @@ insert into Förlag (Namn, Land, Webbplats) values
     ('Penguin Books',   'UK',      'https://www.penguin.co.uk'),
     ('HarperCollins',   'USA',     'https://www.harpercollins.com');
 
--- Kategorier
 insert into Kategorier (Namn, Beskrivning) values
     ('Skönlitteratur', 'Romaner, noveller och poesi'),
     ('Thriller',       'Spänningsromaner och deckare'),
@@ -20,7 +16,6 @@ insert into Kategorier (Namn, Beskrivning) values
     ('Facklitteratur', 'Biografier, historia och vetenskap'),
     ('Klassiker',      'Tidlösa litterära verk');
 
--- Författare (minst 4 krävs)
 insert into Författare (Förnamn, Efternamn, Födelsedatum, Nationalitet) values
     ('Stieg',       'Larsson',  '1954-08-15', 'Svensk'),
     ('Astrid',      'Lindgren', '1907-11-14', 'Svensk'),
@@ -31,7 +26,6 @@ insert into Författare (Förnamn, Efternamn, Födelsedatum, Nationalitet) value
     ('Camilla',     'Läckberg', '1974-08-30', 'Svensk'),
     ('George R.R.', 'Martin',   '1948-09-20', 'Amerikansk');
 
--- Böcker (minst 10 krävs)
 insert into Böcker (ISBN13, Titel, Språk, Pris, Utgivningsdatum, Omslag, Sidor, FörlagID, KategoriID) values
     ('9789113027494', 'Män som hatar kvinnor',                    'Svenska', 189.00, '2005-08-01', 'Häftad',  672, 3, 2),
     ('9789113027500', 'Flickan som lekte med elden',              'Svenska', 189.00, '2006-01-01', 'Häftad',  736, 3, 2),
@@ -46,9 +40,6 @@ insert into Böcker (ISBN13, Titel, Språk, Pris, Utgivningsdatum, Omslag, Sidor
     ('9789163890130', 'Sommarnattens hemlighet',                  'Svenska', 179.00, '2023-06-01', 'Häftad',  380, 3, 1),
     ('9789163890147', 'Ispalatset i Stockholm',                   'Svenska', 199.00, '2024-01-10', 'Inbunden',450, 2, 1);
 
--- BokFörfattare – many-many (VG)
--- Stieg Larsson skriver Millenniumtrilogin
--- Emma Askling skriver tre böcker, varav en tillsammans med Camilla Läckberg
 insert into BokFörfattare (ISBN13, FörfattareID) values
     ('9789113027494', 1),
     ('9789113027500', 1),
@@ -64,14 +55,12 @@ insert into BokFörfattare (ISBN13, FörfattareID) values
     ('9789163890147', 5),
     ('9789163890147', 7);
 
--- Butiker (minst 3 krävs)
 insert into Butiker (Butiksnamn, Gatuadress, Postnummer, Stad, Telefon) values
     ('Bokpalatset Stockholm', 'Drottninggatan 12', '11151', 'Stockholm', '08-123 45 67'),
     ('Bokpalatset Göteborg',  'Avenyn 45',         '41136', 'Göteborg',  '031-234 56 78'),
     ('Bokpalatset Malmö',     'Stortorget 3',      '21122', 'Malmö',     '040-345 67 89'),
     ('Bokpalatset Uppsala',   'Stora Torget 8',    '75310', 'Uppsala',   '018-456 78 90');
 
--- LagerSaldo – alla butiker × ett urval böcker
 insert into LagerSaldo (ButikID, ISBN, Antal) values
     (1, '9789113027494', 12), (1, '9789113027500',  8), (1, '9789113027517',  6),
     (1, '9789129688313', 15), (1, '9789129688320', 10),
@@ -97,7 +86,6 @@ insert into LagerSaldo (ButikID, ISBN, Antal) values
     (4, '9789174292343',  3),
     (4, '9789163890123',  4), (4, '9789163890130',  1), (4, '9789163890147',  1);
 
--- Kunder
 insert into Kunder (Förnamn, Efternamn, Epost, Telefon, Gatuadress, Postnummer, Stad) values
     ('Anna',   'Svensson',  'anna.svensson@epost.se', '070-111 22 33', 'Kungsgatan 5',     '11122', 'Stockholm'),
     ('Erik',   'Johansson', 'erik.j@webmail.se',      '073-222 33 44', 'Vasagatan 10',     '41126', 'Göteborg'),
@@ -106,7 +94,6 @@ insert into Kunder (Förnamn, Efternamn, Epost, Telefon, Gatuadress, Postnummer,
     ('Sofia',  'Lindqvist', 'sofia.l@surfmail.se',    '076-444 55 66', 'Birger Jarlsg 7',  '11457', 'Stockholm'),
     ('Mikael', 'Berg',      'mikael.berg@npost.se',   '070-555 66 77', 'Haga Nygata 22',   '41301', 'Göteborg');
 
--- Ordrar
 insert into Ordrar (KundID, ButikID, Orderdatum, Status, TotalBelopp) values
     (1, 1, '2024-01-15 10:30:00', 'Levererad', 348.00),
     (2, 2, '2024-02-20 14:00:00', 'Levererad', 159.00),
@@ -116,7 +103,6 @@ insert into Ordrar (KundID, ButikID, Orderdatum, Status, TotalBelopp) values
     (5, 1, '2024-06-01 13:00:00', 'Mottagen',  179.00),
     (6, 2, '2024-06-03 08:30:00', 'Mottagen',  348.00);
 
--- OrderRader
 insert into OrderRader (OrderID, ISBN, Antal, Enhetspris) values
     (1, '9789113027494', 1, 189.00),
     (1, '9789113027500', 1, 159.00),
@@ -131,7 +117,6 @@ insert into OrderRader (OrderID, ISBN, Antal, Enhetspris) values
     (7, '9789113027494', 1, 189.00),
     (7, '9789113027500', 1, 159.00);
 
--- Anställda – personal i varje butik
 insert into Anställda (ButikID, Förnamn, Efternamn, Epost, Telefon, Roll, Anställd) values
     (1, 'Eva',       'Holm',        'eva.holm@bokpalatset.se',    '070-111 11 11', 'Butikschef',    '2020-03-01'),
     (1, 'Patrik',    'Lundin',      'patrik.l@bokpalatset.se',    '070-222 22 22', 'Säljare',       '2021-06-15'),
@@ -143,7 +128,6 @@ insert into Anställda (ButikID, Förnamn, Efternamn, Epost, Telefon, Roll, Anst
     (4, 'Nina',      'Johansson',   'nina.j@bokpalatset.se',       null,           'Butikschef',    '2020-05-01'),
     (4, 'Fredrik',   'Dahl',        'fredrik.d@bokpalatset.se',   '070-777 77 77', 'Säljare',       '2023-03-15');
 
--- Recensioner – kundrecensioner av böcker
 insert into Recensioner (ISBN13, KundID, Betyg, Kommentar, Datum) values
     ('9789113027494', 1, 5, 'En av de bästa deckare jag läst. Spännande från första sidan!',        '2024-02-01 10:00:00'),
     ('9789113027494', 2, 4, 'Mycket bra, men något långsam i mitten.',                         '2024-02-10 14:30:00'),
